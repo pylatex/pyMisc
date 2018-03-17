@@ -1,14 +1,9 @@
-
-// Decode decodes an array of bytes into an object.
-//  - fPort contains the LoRaWAN fPort number
-//  - bytes is an array of bytes, e.g. [225, 230, 255, 0]
-// The function must return an object, e.g. {"temperature": 22.5}
-function Decode(fPort, bytes) {
+function pruebaindep (puerto,bytes) {
     var evb_sensors = {};
     if (fPort == 1 || fPort == 2 || fPort == 5) {
         /*
-         * Evaluation board properties.
-         */
+        * Evaluation board properties.
+        */
         var EVB_TYPE = {
             none: 0,
             //led_1: 1,
@@ -34,15 +29,15 @@ function Decode(fPort, bytes) {
             m2x_key: 20,
         };
         /*
-         * Process the EVB LoRa payload.
-         *
-         * EVB payload contains one or more TLV fields.
-         *
-         * [<type: accelerometer><length: 6><x-high><x-low><y-high><y-low><z-high><z-low>]
-         * [<type: barometer><length: 3><byte2><byte1><byte0>]
-         * [<type: temperature><length: 2><byte-high><byte-low>]
-         * 
-         */
+        * Process the EVB LoRa payload.
+        *
+        * EVB payload contains one or more TLV fields.
+        *
+        * [<type: accelerometer><length: 6><x-high><x-low><y-high><y-low><z-high><z-low>]
+        * [<type: barometer><length: 3><byte2><byte1><byte0>]
+        * [<type: temperature><length: 2><byte-high><byte-low>]
+        * 
+        */
 
 
         for (var index = 0; index < bytes.length;) {
@@ -165,4 +160,12 @@ function Decode(fPort, bytes) {
             byte[index++];
     }
     return evb_sensors;
+}
+
+// Decode decodes an array of bytes into an object.
+//  - fPort contains the LoRaWAN fPort number
+//  - bytes is an array of bytes, e.g. [225, 230, 255, 0]
+// The function must return an object, e.g. {"temperature": 22.5}
+function Decode(fPort, bytes) {
+    return pruebaindep (fPort,bytes);
 }
