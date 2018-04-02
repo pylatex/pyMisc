@@ -219,6 +219,13 @@ function Cayenne (bytes) {
  * The function must return an object, e.g. {"temperature": 22.5}
 */
 function Decode(fPort, bytes) {
+    b2str = "";
+    for (i=0;i<bytes.length;i++){
+        if (bytes[i]<16)
+            b2str = b2str.concat("0");
+        b2str = b2str.concat(bytes[i].toString(16));
+    }
+
     var PORT_TYPE = {
         MAC: 0,
         multitech: 1,
@@ -227,6 +234,7 @@ function Decode(fPort, bytes) {
         Cayenne: 15
     }
 
+    evb_sensors = {};
     switch (fPort) {
         case PORT_TYPE.MAC:
             //TO-DO: Actions for MAC messages
@@ -234,20 +242,21 @@ function Decode(fPort, bytes) {
             break;
 
         case PORT_TYPE.multitech:
-            return MTform(bytes);
+            evb_sensors = MTform(bytes);
             break;
 
         case PORT_TYPE.pylatex:
-            return pylatexForm(bytes);
+            evb_sensors = pylatexForm(bytes);
             break;
 
         case PORT_TYPE.NMEA:
-            return NMEA(bytes);
+            evb_sensors = NMEA(bytes);
             break;
 
         case PORT_TYPE.Cayenne:
-            return Cayenne(bytes);
+            evb_sensors = Cayenne(bytes);
             break;
     }
+    evb_sensors.rawHexData = b2str;
     return evb_sensors;
 }
