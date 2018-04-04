@@ -124,13 +124,14 @@ function pylatexForm (bytes) {
     //Tipos de variable
     var tipos = {
         none:               0,  //Error o estado del nodo o alguno de sus componentes
-        co2ppm:             1,  //A
-        tvocppm:            2,  //A
+        co2:                1,  //A
+        tvoc:               2,  //A
         pm025:              3,  //A
         pm100:              4,  //A
-        hum_rel:            5,  //A --> B
-        temperature:        6,  //A --> B
-        illuminance:        7,  // ??
+        humidity1:          5,  //A --> B
+        temperature1:       6,  //A --> B
+        illuminance1:       7,  //A/1.2
+        illuminance2:       9,  //A/2.4
         gas:                8   //A
     };
 
@@ -140,57 +141,94 @@ function pylatexForm (bytes) {
         var type = bytes[index++];
         var value;
 
-        var A = (bytes[index] << 8) + (bytes[index+1]);
         switch (type) {
 
-            case tipos.co2ppm:
+            case tipos.co2:
                 if (typeof (sensores.co2) == "undefined") {
                     sensores.co2 = [];
                 }
-                sensores.co2.push({ch: channel,val: A,unit: "ppm"});
-                index += 2;
+                value = bytes[index++] << 8;
+                value += bytes[index++];
+                sensores.co2.push({ch: channel,val: value,unit: "ppm"});
                 break;
 
-            case tipos.tvocppm:
-                sensores.tvoc = {};
-                sensores.tvoc.ppm = A;
-                index += 2;
+            case tipos.tvoc:
+                if (typeof (sensores.tvoc) == "undefined") {
+                    sensores.tvoc = [];
+                }
+                value = bytes[index++] << 8;
+                value += bytes[index++];
+                sensores.tvoc.push({ch: channel,val: value,unit: "ppb"});
                 break;
 
             case tipos.pm025:
-                sensores.pm025 = {};
-                sensores.pm025.ppm = A;
-                index += 2;
+                if (typeof (sensores.pm025) == "undefined") {
+                    sensores.pm025 = [];
+                }
+                value = bytes[index++] << 8;
+                value += bytes[index++];
+                sensores.pm025.push({ch: channel,val: value,unit: "ppm"});
                 break;
 
             case tipos.pm100:
-                sensores.pm100 = {};
-                sensores.pm100.ppm = A;
-                index += 2;
+                if (typeof (sensores.pm100) == "undefined") {
+                    sensores.pm100 = [];
+                }
+                value = bytes[index++] << 8;
+                value += bytes[index++];
+                sensores.pm100.push({ch: channel,val: value,unit: "ppm"});
                 break;
 
-            case tipos.hum_rel:
-                sensores.rh = {};
-                sensores.rh.percent = A;
-                index += 2;
+            case tipos.humidity1:
+                if (typeof (sensores.humidity) == "undefined") {
+                    sensores.humidity = [];
+                }
+                value = bytes[index++] << 8;
+                value += bytes[index++];
+                //TODO: Final Fitting
+                sensores.humidity.push({ch: channel,val: value,unit: "%"});
                 break;
 
-            case tipos.temperature:
-                sensores.temp = {};
-                sensores.temp.celsius = A;
-                index += 2;
+            case tipos.temperature1:
+                if (typeof (sensores.temperature) == "undefined") {
+                    sensores.temperature = [];
+                }
+                value = bytes[index++] << 8;
+                value += bytes[index++];
+                //TODO: Final Fitting
+                sensores.temperature.push({ch: channel,val: value,unit: "°C"});
                 break;
 
-            case tipos.illuminance:
-                sensores.luz = {};
-                sensores.luz.lux = A;
-                index += 2;
+            case tipos.illuminance1:
+                if (typeof (sensores.illuminance) == "undefined") {
+                    sensores.illuminance = [];
+                }
+                value = bytes[index++] << 8;
+                value += bytes[index++];
+                value /= 1.2;
+                sensores.illuminance.push({ch: channel,val: value,unit: "lx"});
+                break;
+
+            case tipos.illuminance2:
+                if (typeof (sensores.illuminance) == "undefined") {
+                    sensores.illuminance = [];
+                }
+                value = bytes[index++] << 8;
+                value += bytes[index++];
+                value /= 2.4;
+                sensores.illuminance.push({ch: channel,val: value,unit: "lx"});
                 break;
 
             case tipos.gas:
-                sensores.gas = {};
-                sensores.gas.adc = A;
-                index += 2;
+                if (typeof (sensores.gas) == "undefined") {
+                    sensores.gas = [];
+                }
+                value = bytes[index++] << 8;
+                value += bytes[index++];
+                //TODO: Final fitting after ADC, not just only the equivalent voltage in ADC pin
+                value /= 1024.0;
+                value *= 5.0;
+                sensores.gas.push({ch: channel,val: value,unit: "V"});
                 break;
 
             default:
