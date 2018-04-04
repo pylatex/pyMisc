@@ -136,6 +136,7 @@ function pylatexForm (bytes) {
 
     //Procesamiento de la carga util
     for (var index = 0; index < bytes.length;) {
+        var channel = bytes[index++];
         var type = bytes[index++];
         var value;
 
@@ -143,8 +144,10 @@ function pylatexForm (bytes) {
         switch (type) {
 
             case tipos.co2ppm:
-                sensores.co2 = {};
-                sensores.co2.ppm = A;
+                if (typeof (sensores.co2) == "undefined") {
+                    sensores.co2 = [];
+                }
+                sensores.co2.push({ch: channel,val: A,unit: "ppm"});
                 index += 2;
                 break;
 
