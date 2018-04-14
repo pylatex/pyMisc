@@ -132,7 +132,8 @@ function pylatexForm (bytes) {
         temperature1:       6,  //A --> B
         illuminance1:       7,  //A/1.2
         illuminance2:       9,  //A/2.4
-        gas:                8   //A
+        gas:                8,  //A
+        composite1:         10, //..
     };
 
     //Procesamiento de la carga util
@@ -229,6 +230,45 @@ function pylatexForm (bytes) {
                 value /= 1024.0;
                 value *= 5.0;
                 sensores.gas.push({ch: channel,val: value,unit: "V"});
+                break;
+
+            case tipos.composite1:
+                if (typeof (sensores.pressure) == "undefined") {
+                    sensores.pressure = [];
+                }
+                if (typeof (sensores.temperature) == "undefined") {
+                    sensores.temperature = [];
+                }
+                //TODO: Revisar el signo de los numeros.
+                vals=[];
+                for (i=0;i<30;){
+                    aux=0;
+                    if (i<24) {
+                        aux  = bytes[index++] << 8;
+                        aux += bytes[index++];
+                        if ((i==0 || i==6)&&(aux & 0x8000)>0) {
+                            aux -= 0x10000;
+                        }
+                        i+=2;
+                    } else {
+                        aux  = bytes[index++] << 12;
+                        aux += bytes[index++] << 4;
+                        aux += bytes[index++] >> 4;
+                        i+=3;
+                    }
+                    vals.push(aux);
+                }
+                //T1--T3    vals[0 - 2]
+                //P1--P9    vals[3 - 11]
+                //PRESS     vals[12]
+                //TEMP      vals[13]
+                VH=vals[13]/16.0-vals[0];   //VK
+                VH=vals[1]*VH/1024.0+vals[2]*Math.pow(VH,2)/67108864.0; //VH
+                sensores.pressure.push({ch: channel,val: VH/5120.0,unit: "°C",arr: vals});
+                VH=VH/2-64000.0;    //VE - ok
+                VH=(6250.0/vals[3])*(1048576.0-(vals[12]+Math.pow(VH,2)*vals[8]/Math.pow(2,29) + VH*vals[7]/8192.0 + vals[7]/16.0)) / (1+Math.pow(VH,2)*vals[5]/Math.pow(2,53) + VH*vals[4]/Math.pow(2,34));  //VL
+                VH=Math.pow(VH,2)*vals[11]/Math.pow(2,35)+VH*(1+vals[10]/Math.pow(2,19))+vals[9]/16.0;
+                sensores.pressure.push({ch: channel,val: VH,unit: "Pa",arr: vals});
                 break;
 
             default:
