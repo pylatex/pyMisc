@@ -262,12 +262,28 @@ function pylatexForm (bytes) {
                 //P1--P9    vals[3 - 11]
                 //PRESS     vals[12]
                 //TEMP      vals[13]
+                // Prueba: vals=[27504,26435,-1000,36477,-10685,3024,2855,140,-7,15500,-14600,6000,415148,519888];
                 VH=vals[13]/16.0-vals[0];   //VK
                 VH=vals[1]*VH/1024.0+vals[2]*Math.pow(VH,2)/67108864.0; //VH
                 sensores.pressure.push({ch: channel,val: VH/5120.0,unit: "°C",arr: vals});
                 VH=VH/2-64000.0;    //VE - ok
+                //*
+                var2=Math.pow(VH,2)*vals[8]/32768.0;
+                var2+=VH*vals[7]*2.0;
+                var2/=4.0;
+                var2+=vals[6]*65536.0;
+                var1=(vals[5]*Math.pow(VH,2)/524288.0+vals[4]*VH)/524288.0;
+                var1=(1.0+var1/32768.0)*vals[3];
+                p=1048576.0-vals[12];
+                p=(p-var2/4096.0)*6250.0/var1;
+                var1=vals[11]*Math.pow(p,2)/2147483648.0;
+                var2=p*vals[10]/32768.0;
+                p+=(var1+var2+vals[9])/16.0;
+                // */
+                /*
                 VH=(6250.0/vals[3])*(1048576.0-(vals[12]+Math.pow(VH,2)*vals[8]/Math.pow(2,29) + VH*vals[7]/8192.0 + vals[7]/16.0)) / (1+Math.pow(VH,2)*vals[5]/Math.pow(2,53) + VH*vals[4]/Math.pow(2,34));  //VL
                 VH=Math.pow(VH,2)*vals[11]/Math.pow(2,35)+VH*(1+vals[10]/Math.pow(2,19))+vals[9]/16.0;
+                // */
                 sensores.pressure.push({ch: channel,val: VH,unit: "Pa",arr: vals});
                 break;
 
