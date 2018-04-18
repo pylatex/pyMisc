@@ -138,7 +138,7 @@ function pylatexForm (bytes) {
 
     //Procesamiento de la carga util
     for (var index = 0; index < bytes.length;) {
-        var channel = bytes[index++];
+        channel = null;
         var type = bytes[index++];
         var value;
 
