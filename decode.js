@@ -134,6 +134,8 @@ function pylatexForm (bytes) {
         illuminance2:       9,  //A/2.4
         gas:                8,  //A
         composite1:         10, //..
+        precipitation:      11, //A
+        windspeed:          12, //A
     };
 
     //Procesamiento de la carga util
@@ -285,6 +287,24 @@ function pylatexForm (bytes) {
                 VH=Math.pow(VH,2)*vals[11]/Math.pow(2,35)+VH*(1+vals[10]/Math.pow(2,19))+vals[9]/16.0;
                 // */
                 sensores.pressure.push({ch: channel,val: VH,unit: "Pa",arr: vals});
+                break;
+
+            case tipos.precipitation:   //Unidad: mL/min
+                if (typeof (sensores.precipitation) == "undefined") {
+                    sensores.precipitation = [];
+                }
+                value = bytes[index++] << 8;
+                value += bytes[index++];
+                sensores.precipitation.push({ch: channel,val: value,unit: "mL/min"});
+                break;
+
+            case tipos.windspeed:       //Unidad: m/h
+                if (typeof (sensores.windspeed) == "undefined") {
+                    sensores.windspeed = [];
+                }
+                value = bytes[index++] << 8;
+                value += bytes[index++];
+                sensores.windspeed.push({ch: channel,val: value,unit: "m/h"});
                 break;
 
             default:
