@@ -134,11 +134,15 @@ function pylatexForm (bytes) {
         illuminance2:       9,  //A/2.4
         gas:                8,  //A
         composite1:         10, //..
+        precipitation:      11, //A
+        windspeed:          12, //A
+        gpsLocation:        13, //F
     };
 
     //Procesamiento de la carga util
     for (var index = 0; index < bytes.length;) {
-        var channel = bytes[index++];
+        var channel = bytes[index++];   //En presencia de octeto de canal
+        //var channel = 1;                //En ausencia del octeto de canal
         var type = bytes[index++];
         var value;
 
@@ -285,6 +289,35 @@ function pylatexForm (bytes) {
                 VH=Math.pow(VH,2)*vals[11]/Math.pow(2,35)+VH*(1+vals[10]/Math.pow(2,19))+vals[9]/16.0;
                 // */
                 sensores.pressure.push({ch: channel,val: VH,unit: "Pa",arr: vals});
+                break;
+
+            case tipos.gpsLocation:
+                if (typeof (sensores.gpsLocation) == "undefined") {
+                    sensores.gpsLocation = [];
+                }
+                //Rearmado de los valores
+                latVal = bytes[index++] << 16;
+                latVal += bytes[index++] << 8;
+                latVal += bytes[index++];
+                lonVal = bytes[index++] << 16;
+                lonVal += bytes[index++] << 8;
+                lonVal += bytes[index++];
+                hVal = bytes[index++] << 16;
+                hVal += bytes[index++] << 8;
+                hVal += bytes[index++];
+                //Correccion de Signo
+                if ((latVal &  0x800000)>0)
+                    latVal -= 0x1000000;
+                if ((lonVal &  0x800000)>0)
+                    lonVal -= 0x1000000;
+                if ((hVal &  0x800000)>0)
+                    hVal -= 0x1000000;
+                //Correccion de Escala
+                latVal /= 10000.0;
+                lonVal /= 10000.0;
+                hVal /= 100.0;
+                //Entrega final
+                sensores.gpsLocation.push({ch: channel,latitude: latVal,longitude: lonVal,altitude: hVal, unitLatLon: "°",unitAltitude: "m"});
                 break;
 
             default:
