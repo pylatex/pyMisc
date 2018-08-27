@@ -152,98 +152,98 @@ function pylatexForm (bytes) {
 
             case tipos.co2:
                 if (typeof (sensores.co2) == "undefined") {
-                    sensores.co2 = [];
+                    sensores.co2 = {};
                 }
                 value = bytes[index++] << 8;
                 value += bytes[index++];
-                sensores.co2.push({ch: channel,val: value,unit: "ppm"});
+                sensores.co2[channel]={val: value,unit: "ppm"};
                 break;
 
             case tipos.tvoc:
                 if (typeof (sensores.tvoc) == "undefined") {
-                    sensores.tvoc = [];
+                    sensores.tvoc = {};
                 }
                 value = bytes[index++] << 8;
                 value += bytes[index++];
-                sensores.tvoc.push({ch: channel,val: value,unit: "ppb"});
+                sensores.tvoc[channel]={val: value,unit: "ppb"};
                 break;
 
             case tipos.pm025:
                 if (typeof (sensores.pm025) == "undefined") {
-                    sensores.pm025 = [];
+                    sensores.pm025 = {};
                 }
                 value = bytes[index++] << 8;
                 value += bytes[index++];
-                sensores.pm025.push({ch: channel,val: value,unit: "ppm"});
+                sensores.pm025[channel]={val: value,unit: "ppm"};
                 break;
 
             case tipos.pm100:
                 if (typeof (sensores.pm100) == "undefined") {
-                    sensores.pm100 = [];
+                    sensores.pm100 = {};
                 }
                 value = bytes[index++] << 8;
                 value += bytes[index++];
-                sensores.pm100.push({ch: channel,val: value,unit: "ppm"});
+                sensores.pm100[channel]={val: value,unit: "ppm"};
                 break;
 
             case tipos.humidity1:
                 if (typeof (sensores.humidity) == "undefined") {
-                    sensores.humidity = [];
+                    sensores.humidity = {};
                 }
                 value = bytes[index++] << 8;
                 value += bytes[index++];
                 //TODO: Final Fitting
-                sensores.humidity.push({ch: channel,val: value,unit: "%"});
+                sensores.humidity[channel]={val: value,unit: "%"};
                 break;
 
             case tipos.temperature1:
                 if (typeof (sensores.temperature) == "undefined") {
-                    sensores.temperature = [];
+                    sensores.temperature = {};
                 }
                 value = bytes[index++] << 8;
                 value += bytes[index++];
                 //TODO: Final Fitting
-                sensores.temperature.push({ch: channel,val: value,unit: "°C"});
+                sensores.temperature[channel]={val: value,unit: "°C"};
                 break;
 
             case tipos.illuminance1:
                 if (typeof (sensores.illuminance) == "undefined") {
-                    sensores.illuminance = [];
+                    sensores.illuminance = {};
                 }
                 value = bytes[index++] << 8;
                 value += bytes[index++];
                 value /= 1.2;
-                sensores.illuminance.push({ch: channel,val: value,unit: "lx"});
+                sensores.illuminance[channel]={val: value,unit: "lx"};
                 break;
 
             case tipos.illuminance2:
                 if (typeof (sensores.illuminance) == "undefined") {
-                    sensores.illuminance = [];
+                    sensores.illuminance = {};
                 }
                 value = bytes[index++] << 8;
                 value += bytes[index++];
                 value /= 2.4;
-                sensores.illuminance.push({ch: channel,val: value,unit: "lx"});
+                sensores.illuminance[channel]={val: value,unit: "lx"};
                 break;
 
             case tipos.gas:
                 if (typeof (sensores.gas) == "undefined") {
-                    sensores.gas = [];
+                    sensores.gas = {};
                 }
                 value = bytes[index++] << 8;
                 value += bytes[index++];
                 //TODO: Final fitting after ADC, not just only the equivalent voltage in ADC pin
                 value /= 1024.0;
                 value *= 5.0;
-                sensores.gas.push({ch: channel,val: value,unit: "V"});
+                sensores.gas[channel]={val: value,unit: "V"};
                 break;
 
             case tipos.composite1:
                 if (typeof (sensores.pressure) == "undefined") {
-                    sensores.pressure = [];
+                    sensores.pressure = {};
                 }
                 if (typeof (sensores.temperature) == "undefined") {
-                    sensores.temperature = [];
+                    sensores.temperature = {};
                 }
                 //TODO: Revisar el signo de los numeros.
                 vals=[];
@@ -271,7 +271,7 @@ function pylatexForm (bytes) {
                 // Prueba: vals=[27504,26435,-1000,36477,-10685,3024,2855,140,-7,15500,-14600,6000,415148,519888];
                 VH=vals[13]/16.0-vals[0];   //VK
                 VH=vals[1]*VH/1024.0+vals[2]*Math.pow(VH,2)/67108864.0; //VH
-                sensores.pressure.push({ch: channel,val: VH/5120.0,unit: "°C",arr: vals});
+                sensores.temperature[channel]={val: VH/5120.0,unit: "°C",arr: vals};
                 VH=VH/2-64000.0;    //VE - ok
                 //*
                 var2=Math.pow(VH,2)*vals[8]/32768.0;
@@ -290,12 +290,12 @@ function pylatexForm (bytes) {
                 VH=(6250.0/vals[3])*(1048576.0-(vals[12]+Math.pow(VH,2)*vals[8]/Math.pow(2,29) + VH*vals[7]/8192.0 + vals[7]/16.0)) / (1+Math.pow(VH,2)*vals[5]/Math.pow(2,53) + VH*vals[4]/Math.pow(2,34));  //VL
                 VH=Math.pow(VH,2)*vals[11]/Math.pow(2,35)+VH*(1+vals[10]/Math.pow(2,19))+vals[9]/16.0;
                 // */
-                sensores.pressure.push({ch: channel,val: VH,unit: "Pa",arr: vals});
+                sensores.pressure[channel]={val: VH,unit: "Pa",arr: vals};
                 break;
 
             case tipos.gpsLocation:
                 if (typeof (sensores.gpsLocation) == "undefined") {
-                    sensores.gpsLocation = [];
+                    sensores.gpsLocation = {};
                 }
                 //Rearmado de los valores
                 latVal = bytes[index++] << 16;
@@ -319,7 +319,7 @@ function pylatexForm (bytes) {
                 lonVal /= 10000.0;
                 hVal /= 100.0;
                 //Entrega final
-                sensores.gpsLocation.push({ch: channel,latitude: latVal,longitude: lonVal,altitude: hVal, unitLatLon: "°",unitAltitude: "m"});
+                sensores.gpsLocation[channel]={latitude: latVal,longitude: lonVal,altitude: hVal, unitLatLon: "°",unitAltitude: "m"};
                 break;
 
             default:
