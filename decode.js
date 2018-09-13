@@ -1,5 +1,3 @@
-
-
 //PUERTO 1: Desarrollo con MTDot Box
 function MTform (bytes) {
     var evb_sensors = {};
@@ -117,6 +115,48 @@ function MTform (bytes) {
         }
     }
     return evb_sensors;
+}
+
+//PUERTO 2: Mote II, Sensor GPS Demo. Pag. 12 del LoRaMote Config User Guide
+function MoteII_gpsdemo (bytes) {
+    var sensors = {};
+    index = 0;
+
+    //Decoding
+    sensors.led = bytes[index++];
+    sensors.pressure = bytes[index++]<<8;
+    sensors.pressure += bytes[index++];
+    sensors.temperature = bytes[index++]<<8;
+    sensors.temperature += bytes[index++];
+    sensors.altitude_barometric = bytes[index++]<<8;
+    sensors.altitude_barometric += bytes[index++];
+    sensors.battery = bytes[index++];
+    sensors.latitude = bytes[index++]<<16;
+    sensors.latitude += bytes[index++]<<8;
+    sensors.latitude += bytes[index++];
+    sensors.longitude = bytes[index++]<<16;
+    sensors.longitude += bytes[index++]<<8;
+    sensors.longitude += bytes[index++];
+    sensors.altitude_gps = bytes[index++]<<8;
+    sensors.altitude_gps += bytes[index++];
+
+    //Sign Fix
+    if ((sensors.temperature & 0x8000)>0) sensors.temperature -= 0x10000;//temp: 16 bit signed
+    if ((sensors.altitude_barometric & 0x8000)>0) sensors.altitude_barometric -= 0x10000;//altitude: 16 bit signed
+    if ((sensors.altitude_gps & 0x8000)>0) sensors.altitude_gps -= 0x10000;//altitude: 16 bit signed
+    if ((sensors.latitude & 0x800000)>0) sensors.latitude -= 0x1000000;//Lat: 24 bit signed
+    if ((sensors.longitude & 0x800000)>0) sensors.longitude -= 0x1000000;//Lon: 24 bit signed
+
+    //Fixing Scales
+    sensors.pressure *= 10.0;
+    sensors.temperature /= 100.0;
+    sensors.altitude_barometric /= 10.0;
+    sensors.latitude /= Math.pow(2.0,23.0);
+    sensors.latitude *= 90.0;
+    sensors.longitude /= Math.pow(2.0,23.0);
+    sensors.longitude *= 180.0;
+
+    return sensors;
 }
 
 //PUERTO 5: Formato propio para pruebas/desarrollo en Pylatex
@@ -361,6 +401,7 @@ function Decode(fPort, bytes) {
     var PORT_TYPE = {
         MAC: 0,
         multitech: 1,
+        mote2_sensorgpsdemo: 2,
         pylatex: 5,
         NMEA: 10,
         Cayenne: 15
@@ -375,6 +416,10 @@ function Decode(fPort, bytes) {
 
         case PORT_TYPE.multitech:
             evb_sensors = MTform(bytes);
+            break;
+        
+        case PORT_TYPE.mote2_sensorgpsdemo:
+            evb_sensors = MoteII_gpsdemo(bytes);
             break;
 
         case PORT_TYPE.pylatex:
